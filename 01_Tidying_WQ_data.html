@@ -1718,7 +1718,7 @@ border-radius: 0px;
 
 <div id="why-public-datasets" class="section level1">
 <h1>Why public datasets?</h1>
-<p>Working with large, open-access datasets can serve many purposes. It
+<p>Working with large, open-access data sets can serve many purposes. It
 can be an excellent way to explore new ideas, before investing in
 field-work or experiments. It can be a great way to take local or
 experimental results and expand them to different ecosystems, places, or
@@ -1726,11 +1726,11 @@ landscapes. Or it can be an excellent way to build, validate, and test
 ecological models on regional or national scales.</p>
 <p>So why doesn’t everyone use public data? Well, it’s often collected
 by a variety of organizations, with different methods, units, and
-incosistent metadata. Together these issues with large public datasets,
-make them “messy.” Messy data can be messy in many different ways, but
-at the basic level it means that data is hard to analyze, not because
-the data itself is bad, but because the way it is organized is unclear
-or inconsistent.</p>
+innconsistent metadata. Together these issues make large public data
+sets “messy.” Messy data can be messy in many different ways, but at the
+basic level it means that data is hard to analyze; not because the data
+itself is bad, but because the way it is organized is unclear or
+inconsistent.</p>
 <p>In this lab, we will learn some tricks to “tidying” data, making it
 analysis-ready. We will depend heavily on the <a href="https://www.tidyverse.org/">tidyverse</a>, an excellent series of
 packages that make data manipulation beautiful and easy. We will also be
@@ -1740,13 +1740,13 @@ package for downloading data from the Water Quality Portal and the
 USGS.</p>
 <div id="loading-key-packages" class="section level2">
 <h2>Loading key packages</h2>
-<p>This lab is meant to introduce the incredible variety of tools that
-one can use to clean data, many of these tools are captured by the
+<p>This lesson is meant to introduce the incredible variety of tools
+that one can use to clean data, many of these tools are captured by the
 <code>tidyverse</code> meta-package, a package of packages, but there
 are some additional ones that will help us locate our various water
 quality sites.</p>
-<pre class="r"><code>library(tidyverse) # Package with dplyr, tibble, readr, and others to help clean coding
-library(dataRetrieval) # Package to download data. 
+<pre class="r"><code>library(tidyverse) #Package with dplyr, tibble, readr, and others to help clean coding
+library(dataRetrieval) #Package to download data. 
 library(sf) #Geospatial package to plot and explore data
 library(mapview) #Simple interface to leaflet interactive maps
 library(broom) #Simplifies model outputs
@@ -1756,13 +1756,12 @@ library(lubridate) #Makes working with dates easier
 library(ggthemes) #Makes plots prettier
 library(tidyr) #Makes multiple simultaneous models easier
 
-
 #Move the directory to the top folder level
 knitr::opts_knit$set(root.dir=&#39;..&#39;)</code></pre>
 </div>
 </div>
-<div id="downloading-data." class="section level1">
-<h1>Downloading data.</h1>
+<div id="downloading-data" class="section level1">
+<h1>Downloading data</h1>
 <p>For this lab, we’ll explore water quality data in the Colorado River
 basin as it moves from Colorado to Arizona. All data will be generated
 through the code you see below, with the only external information
@@ -1774,89 +1773,93 @@ startdate, enddate, constituents, etc…). We’ll generate these rules for
 downloading the data here.</p>
 <div id="download-prep" class="section level2">
 <h2>Download prep</h2>
-<pre class="r"><code>#First we&#39;ll make a tibble (a tidyverse table) with Site IDs. Generally these are increasingly downstream of the CO headwaters near Grand Lake. 
-colorado &lt;- tibble(sites=c(&#39;USGS-09034500&#39;,&#39;USGS-09069000&#39;,
-                           &#39;USGS-09085000&#39;,&#39;USGS-09095500&#39;,&#39;USGS-09152500&#39;),
-                   basin=c(&#39;colorado1&#39;,&#39;eagle&#39;,
-                           &#39;roaring&#39;,&#39;colorado3&#39;,&#39;gunnison&#39;))
+<pre class="r"><code># First we&#39;ll make a tibble (a tidyverse table) with Site IDs. Generally these are increasingly downstream of the CO headwaters near Grand Lake. 
+colorado &lt;- tibble(sites=c(&#39;USGS-09034500&#39;, &#39;USGS-09069000&#39;,
+                           &#39;USGS-09085000&#39;, &#39;USGS-09095500&#39;, &#39;USGS-09152500&#39;),
+                   basin=c(&#39;colorado1&#39;, &#39;eagle&#39;,
+                           &#39;roaring&#39;, &#39;colorado3&#39;, &#39;gunnison&#39;))
 
-#Now we need to setup a series of rules for downloading data from the Water Quality Portal. 
-#We&#39;ll focus on cation and anion data from 1950-present. Each cation has a name that we might typically use like calcium or sulfate, but the name may be different in the water quality portal, so we have to check this website https://www.waterqualitydata.us/Codes/Characteristicname?mimeType=xml to get our names correct. 
+# Now we need to setup a series of rules for downloading data from the Water Quality Portal. 
+# We&#39;ll focus on cation and anion data from 1950-present. Each cation has a name that we might 
+# typically use like calcium or sulfate, but the name may be different in the water quality
+# portal, so we have to check this website https://www.waterqualitydata.us/Codes/Characteristicname?mimeType=xml 
+# to get our names correct. 
 
-paramater.names &lt;- c(&#39;ca&#39;,&#39;mg&#39;,&#39;na&#39;,&#39;k&#39;,&#39;so4&#39;,&#39;cl&#39;,&#39;hco3&#39;)
+paramater.names &lt;- c(&#39;ca&#39;, &#39;mg&#39;, &#39;na&#39;, &#39;k&#39;, &#39;so4&#39;, &#39;cl&#39;, &#39;hco3&#39;)
 
-ca &lt;- c(&#39;Calcium&#39;)
-mg &lt;- c(&#39;Magnesium&#39;)
+ca &lt;- &#39;Calcium&#39;
+mg &lt;- &#39;Magnesium&#39;
 na &lt;- &#39;Sodium&#39;
 k &lt;- &#39;Potassium&#39;
-so4 &lt;- c(&#39;Sulfate&#39;,&#39;Sulfate as SO4&#39;,&#39;Sulfur Sulfate&#39;,&#39;Total Sulfate&#39;)
+so4 &lt;- c(&#39;Sulfate&#39;, &#39;Sulfate as SO4&#39;, &#39;Sulfur Sulfate&#39;, &#39;Total Sulfate&#39;)
 cl &lt;- &#39;Chloride&#39;
-hco3 &lt;- c(&#39;Alkalinity, bicarbonate&#39;,&#39;Bicarbonate&#39;)
+hco3 &lt;- c(&#39;Alkalinity, bicarbonate&#39;, &#39;Bicarbonate&#39;)
 
-#Compile all these names into a single list
-parameters &lt;- list(ca,mg,na,k,so4,cl,hco3)
-#Name each cation or anion in the list
+# Compile all these names into a single list
+parameters &lt;- list(ca, mg, na, k, so4, cl, hco3)
+
+# Name each cation or anion in the list
 names(parameters) &lt;- paramater.names
-#Notice that we aren&#39;t downloading any nutrients (P or N) because they are much messier (100s of different ways to measure and report concentration data) than other cation anion data. 
 
-#Start dates
+# Notice that we aren&#39;t downloading any nutrients (P or N) because they are much messier (100s of different ways to measure and report concentration 
+# data) than other cation anion data. 
+
+# Start dates
 start &lt;- &#39;1980-10-01&#39;
 end &lt;- &#39;2023-01-01&#39;
 
-#Sample media (no sediment samples)
+# Sample media (no sediment samples)
 sampleMedia = &#39;Water&#39;
 
-#Comple all this information into a list with arguments
-site.args &lt;- list(siteid=colorado$sites,
-                  sampleMedia=sampleMedia,
-                  startDateLo=start,
-                  startDateHi=end,
-                  characteristicName=NA) #We&#39;ll fill this in later in a loop</code></pre>
+# Compile all this information into a list with arguments
+site.args &lt;- list(siteid = colorado$sites,
+                  sampleMedia = sampleMedia,
+                  startDateLo = start,
+                  startDateHi = end,
+                  characteristicName = NA) # We&#39;ll fill this in later in a loop</code></pre>
 </div>
 <div id="concentration-data-download" class="section level2">
 <h2>Concentration data download</h2>
 <p>Now that we have generated the commands to download the data, the
 code to download the data is here, but it is not run on purpose because
-it takes 15 minutes or so to run everytime. You can always run it
-yourself by setting <code>eval=T</code>.</p>
-<pre class="r"><code>conc.list &lt;- list() #Empty list to hold each data download
+it takes 15 minutes or so to run every time. You can always run it
+yourself by setting <code>eval = T</code>.</p>
+<pre class="r"><code>conc.list &lt;- list() # Empty list to hold each data download
 
-
-#We&#39;ll loop over each anion or cation and download all data at our sites for that constituent
+# We&#39;ll loop over each anion or cation and download all data at our sites for that constituent
 for(i in 1:length(parameters)){
-  #We need to rename the characteristicName (constituent) each time we go through the loop
-  site.args$characteristicName&lt;-parameters[[i]]
   
-  #readWQPdata takes in our site.args list and downloads the data according to those rules 
+  # We need to rename the characteristicName (constituent) each time we go through the loop
+  site.args$characteristicName &lt;- parameters[[i]]
+  
+  # readWQPdata takes in our site.args list and downloads the data according to those rules 
   # time, constituent, site, etc...
   
   # Don&#39;t forget about pipes &quot;%&gt;%&quot;! Pipes pass forward the results of a previous command, so that 
-  #You don&#39;t have to constantly rename variables. I love them. 
+  # you don&#39;t have to constantly rename variables. I love them. 
   
   conc.list[[i]] &lt;- readWQPdata(site.args) %&gt;%
-    mutate(parameter=names(parameters)[i]) #Mutate just adds a new column to the data frame
+    mutate(parameter = names(parameters)[i]) #Mutate just adds a new column to the data frame
   
-  #Pipes make the above command simple and succinct versus something more complicated like:
-  
-  ## conc.list[[i]] &lt;- readWQPdata(site.args) 
-  ## conc.list[[i]]$parameter &lt;- names(parameters)[i]
+  # Pipes make the above command simple and succinct versus something more complicated like:
+  # conc.list[[i]] &lt;- readWQPdata(site.args)
+  # conc.list[[i]]$parameter &lt;- names(parameters)[i]
+
 }
 
-#bind all this data together into a single data frame
-conc.long &lt;- map_dfr(conc.list,rbind)</code></pre>
+conc.long &lt;- conc.list %&gt;% bind_rows()</code></pre>
 </div>
 </div>
 <div id="data-tidying" class="section level1">
 <h1>Data tidying</h1>
-<p>Now that we have downloaded the data we need to tidy it up. The water
-quality portal data comes with an incredible amount of metadata in the
-form of extra columns. But we don’t need all this extra data.</p>
-<div id="look-at-the-data-you-downloaded." class="section level2">
-<h2>Look at the data you downloaded.</h2>
+<p>Now that we have downloaded the data, we need to tidy it up. The
+water quality portal data comes with an incredible amount of metadata in
+the form of extra columns, but we don’t need all this extra data.</p>
+<p>Look at the data you downloaded:</p>
 <pre class="r"><code>head(conc.long) %&gt;%
   kable(.,&#39;html&#39;) %&gt;%
   kable_styling() %&gt;%
-  scroll_box(width=&#39;800px&#39;,height=&#39;300px&#39;)</code></pre>
+  scroll_box(width = &#39;800px&#39;,height = &#39;300px&#39;)</code></pre>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:800px; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
@@ -3308,40 +3311,39 @@ ca
 </tbody>
 </table>
 </div>
-</div>
 <div id="initial-cleaning-up" class="section level2">
 <h2>Initial cleaning up</h2>
-<p>Wow that looks messy! Lots of extraneous columns, lots of NAs, so
-much information we can hardly parse it. Let’s pair it down to the
+<p>Wow, that looks messy! Lots of extraneous columns, lots of NAs, so
+much information we can hardly parse it. Let’s pare it down to the
 essentials.</p>
-<pre class="r"><code>#This code mostly just grabs and renames the most important data columns
+<pre class="r"><code># This code mostly just grabs and renames the most important data columns
 conc.clean &lt;-  conc.long %&gt;%
-  dplyr::select(date=ActivityStartDate,
-                parameter=CharacteristicName,
-                units=ResultMeasure.MeasureUnitCode,
-                SiteID=MonitoringLocationIdentifier,
-                org=OrganizationFormalName,
-                org_id=OrganizationIdentifier,
-                time=ActivityStartTime.Time,
-                value=ResultMeasureValue,
-                sample_method=SampleCollectionMethod.MethodName,
-                analytical_method=ResultAnalyticalMethod.MethodName,
-                particle_size=ResultParticleSizeBasisText,
-                date_time=ActivityStartDateTime,
-                media=ActivityMediaName,
-                sample_depth=ActivityDepthHeightMeasure.MeasureValue,
-                sample_depth_unit=ActivityDepthHeightMeasure.MeasureUnitCode,
-                fraction=ResultSampleFractionText,
-                status=ResultStatusIdentifier) %&gt;%
-  #Remove trailing white space in labels
-  mutate(units = trimws(units)) %&gt;%
-  #Keep only samples that are water samples
-  filter(media==&#39;Water&#39;) #Some of these snuck through!</code></pre>
-<p>Now let’s look at the tidier version</p>
+  dplyr::select(date = ActivityStartDate,
+                parameter = CharacteristicName,
+                units = ResultMeasure.MeasureUnitCode,
+                SiteID = MonitoringLocationIdentifier,
+                org = OrganizationFormalName,
+                org_id = OrganizationIdentifier,
+                time = ActivityStartTime.Time,
+                value = ResultMeasureValue,
+                sample_method = SampleCollectionMethod.MethodName,
+                analytical_method = ResultAnalyticalMethod.MethodName,
+                particle_size = ResultParticleSizeBasisText,
+                date_time = ActivityStartDateTime,
+                media = ActivityMediaName,
+                sample_depth = ActivityDepthHeightMeasure.MeasureValue,
+                sample_depth_unit = ActivityDepthHeightMeasure.MeasureUnitCode,
+                fraction = ResultSampleFractionText,
+                status = ResultStatusIdentifier) %&gt;%
+  # Remove trailing white space in labels
+  mutate(units  =  trimws(units)) %&gt;%
+  # Keep only samples that are water samples
+  filter(media == &#39;Water&#39;) </code></pre>
+<p>Now let’s look at the tidier version:</p>
 <pre class="r"><code>head(conc.clean) %&gt;%
   kable(.,&#39;html&#39;) %&gt;%
   kable_styling() %&gt;%
-  scroll_box(width=&#39;800px&#39;,height=&#39;300px&#39;)</code></pre>
+  scroll_box(width = &#39;800px&#39;, height = &#39;300px&#39;)</code></pre>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:800px; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
@@ -3724,12 +3726,12 @@ Historical
 </div>
 <div id="final-tidy-dataset" class="section level2">
 <h2>Final tidy dataset</h2>
-<p>Okay that is getting better but we still have lots of extraneous
-information. For our purposes let’s assume that the sample and
+<p>Okay, that is getting better, but we still have lots of extraneous
+information. For our purposes, let’s assume that the sample and
 analytical methods used by the USGS are reasonable and exchangeable (one
 method is equivalent to the other). If we make that assumption then the
-only remaining data we need to clean is to make sure that all the data
-has the same units.</p>
+only remaining tidying step left is to make sure that all the data is in
+the same units.</p>
 <div id="unit-check" class="section level3">
 <h3>Unit Check</h3>
 <pre class="r"><code>table(conc.clean$units)</code></pre>
@@ -3739,12 +3741,13 @@ has the same units.</p>
 <p>Wow! Almost all the data is in mg/L. That makes our job really
 easy.</p>
 <p>We just need to remove these observations with a
-<code>dplyr::filter</code> call and then select an even smaller subset
+<code>dplyr::filter()</code> call and then select an even smaller subset
 of useful columns, while adding a time object column using the
-<code>lubridate::ymd</code> call.</p>
+<code>lubridate::ymd()</code> call.</p>
 <pre class="r"><code>conc.tidy &lt;- conc.clean %&gt;% 
   filter(units == &#39;mg/l&#39;) %&gt;%
-  mutate(date=ymd(date)) %&gt;%
+  # ymd() converts characters into YYYY-MM-DD date formatting:
+  mutate(date = lubridate::ymd(date)) %&gt;%
   select(date,
          parameter,
          SiteID,
@@ -3752,21 +3755,21 @@ of useful columns, while adding a time object column using the
 </div>
 <div id="daily-data" class="section level3">
 <h3>Daily data</h3>
-<p>Okay now we have a manageable data frame. But how do we want to
-organize the data? Since we are looking at a really long time-series of
-data (70 years), let’s look at data as a daily average. The
-<code>dplyr::group_by and summarize</code> commands make this really
-easy</p>
-<pre class="r"><code>#The amazing group_by function groups all the data so that the summary
-#only applies to each subgroup (site, date, and parameter combination).
-#So in the end you get a daily average concentratino for each site and parameter type. 
+<p>Now we have a manageable data frame. But how do we want to organize
+the data? Since we are looking at a really long time-series of data (70
+years), let’s look at data as a daily average. The
+<code>dplyr::group_by()</code> and <code>dplyr::summarize()</code>
+commands make this really easy:</p>
+<pre class="r"><code># The amazing group_by function groups all the data so that the summary
+# only applies to each subgroup (site, date, and parameter combination).
+# So in the end you get a daily average concentratino for each site and parameter type. 
 conc.daily &lt;- conc.tidy %&gt;%
-  group_by(date,parameter,SiteID) %&gt;% 
-  summarize(conc=mean(conc,na.rm=T))</code></pre>
+  group_by(date, parameter, SiteID) %&gt;% 
+  summarize(conc = mean(conc, na.rm = T))</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;date&#39;, &#39;parameter&#39;. You can override using
 ## the `.groups` argument.</code></pre>
-<p>Taking daily averages looks like it did eliminate 28 observations,
-meaning these site date combinations had multiple observations on the
+<p>Taking daily averages looks like it eliminated 28 observations,
+meaning these site-date combinations had multiple observations on the
 same day.</p>
 </div>
 </div>
@@ -3776,7 +3779,7 @@ same day.</p>
 <p>Let’s imagine you wanted to add data for your water quality analyses,
 but you also know that you need to do this analysis over and over again.
 Let’s walk through how we would: 1) Add new data to our
-<code>conc.clean</code> dataset and 2) how to write a function to
+<code>conc.clean</code> data set, and 2) how to write a function to
 download, clean, and update our data with far less code.</p>
 <div id="question-1." class="section level2">
 <h2>Question 1.</h2>
@@ -3785,52 +3788,47 @@ function call. This function should take in a single tibble that is
 identical in structure to the <code>colorado</code> one above (e.g. it
 has columns named <code>sites</code>, and <code>basin</code>). The
 function should then take in that tibble and be able to download and
-clean data for the any of the sites we listed above to make the data
-look exactly like <code>conc.daily</code>. Use this function to download
-data for the three sites listed below.</p>
-<pre class="r"><code>additional_data &lt;- tibble(sites = c(&#39;USGS-09180000&#39;,&#39;USGS-09180500&#39;,&#39;USGS-09380000&#39;),
-                          basin = c(&#39;dolores&#39;,&#39;colorado4&#39;,&#39;colorado5&#39;))</code></pre>
+clean the data to make the data structure/outcomes exactly like
+<code>conc.daily</code>. Use this function to download data for the
+three sites listed below.</p>
+<pre class="r"><code>additional_data &lt;- tibble(sites = c(&#39;USGS-09180000&#39;, &#39;USGS-09180500&#39;, &#39;USGS-09380000&#39;),
+                          basin = c(&#39;dolores&#39;, &#39;colorado4&#39;, &#39;colorado5&#39;))</code></pre>
 </div>
-<div id="question-2" class="section level2">
-<h2>Question 2</h2>
-<p>Using the function above, download and clean water quality data for
-the sites and basin names listed below. This data should look identical
-to your <code>conc.daily</code> dataset. The steps are:</p>
-<ol style="list-style-type: decimal">
-<li><p>In the function - Download the new data</p></li>
-<li><p>In the function - Clean the new data and make it look identical
-to <code>conc.tidy</code></p></li>
-<li><p>With the data the function returns - Append the new data to
-<code>conc.daily</code> using <code>bind_rows()</code></p></li>
-<li><p>Save the new data as <code>tidied_full_wq.RData</code></p></li>
-</ol>
-<pre class="r"><code>#save(wq, file = &#39;data/tidied_full_wq.RData&#39;)</code></pre>
+<div id="question-2." class="section level2">
+<h2>Question 2.</h2>
+<p>Append the new data that the above function returned to
+<code>conc.daily</code> using <code>bind_rows()</code>. (Remember, this
+new data should be identical in structure to the <code>conc.daily</code>
+data set). Save this new data set as <code>tidied_full_wq.RData</code>
+using the <code>save()</code> function.</p>
+<pre class="r"><code># save(YOUR-NEW-OBJECT, file = &#39;data/tidied_full_wq.RData&#39;)</code></pre>
 </div>
 <div id="question-3" class="section level2">
 <h2>Question 3</h2>
 <p>We now have a dataset of stream water quality data for 9 sites
-throughout Colorado. One potential control on stream chemistry is stream
-discharge. One function that can allow you to easily download discharge
-data is <code>readNWISdv()</code> from the dataRetrieval package. Use
-this function to download daily discharge data for all eight of the
-sites listed above (including the additional data). Save this data as
-<code>data/Q.RData</code>. The site numbers are the same as above but
-you need to remove <code>USGS-</code> from each site. Reminder,
-discharge is <code>00060</code> parameterCd and you can use
-<code>renameNWISColumns()</code> to automatically make the column names
-a little less annoying.</p>
+throughout Colorado. However, one potential control on stream chemistry
+is stream discharge. One function that can allow you to easily download
+discharge data is <code>readNWISdv()</code> from the
+<code>dataRetrieval</code> package. Use this function to download daily
+discharge data for all eight of the sites you’ve already worked with
+above. Save this data as <code>data/Q.RData</code>. The site numbers are
+the same as what we used above, but you need to remove
+<code>USGS-</code> from each site. Reminder, discharge is
+<code>00060</code> for the <code>parameterCd</code> argument. Moreover,
+we can use <code>renameNWISColumns()</code> to automatically make the
+column names a little less annoying.</p>
 <pre class="r"><code># Reminder! you can use ?readNWISdv to read about how the function works. 
 sites &lt;- colorado %&gt;%
-  #Bind the two datasets to get all 8 sites
+  # Bind the two datasets to get all 8 sites
   bind_rows(additional_data) %&gt;%
-  #Grab just the column labeled sites
+  # Grab just the column labeled sites
   pull(sites) %&gt;%
-  #Remove the USGS- prefix
-  gsub(&#39;USGS-&#39;,&#39;&#39;,.)
+  # Remove the USGS- prefix
+  gsub(&#39;USGS-&#39;, &#39;&#39;, .)
 
+#PUT ADDITIONAL CODING STEPS HERE
 
-
-#save(q_data, file = &#39;data/Q.Rdata&#39;)</code></pre>
+#save(YOUR-NEW-OBJECT, file = &#39;data/Q.Rdata&#39;)</code></pre>
 </div>
 </div>
 
